@@ -1,0 +1,1 @@
+# nornmai_resort_be
