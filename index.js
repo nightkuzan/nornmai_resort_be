@@ -91,6 +91,41 @@ app.post('/login', function (request, response) {
     }
 });
 
+app.post('/login-admin', function (request, response) {
+    // Capture the input fields
+    let staffid = request.body.staffid;
+    let password = request.body.password;
+
+    // Ensure the input fields exists and are not empty
+    if (staffid && password) {
+        // Execute SQL query that'll select the account from the database based on the specified username and password
+        connection.query('SELECT s.StaffID, s.sFirstName, s.sLastName, s.sPhoneNum, s.sMail, s.PositionID, p.pName FROM staffinfo s left join position p on p.PositionID = s.PositionID WHERE s.StaffID=? AND s.sPassword=? ', [staffid, password], function (error, results) {
+            // If there is an issue with the query, output the error
+            if (error) throw error;
+            // If the account exists
+            if (results.length > 0) {
+                let body = {
+                    StaffID: results[0].StaffID,
+                    sFirstName: results[0].sFirstName,
+                    sLastName: results[0].sLastName,
+                    sPhoneNum: results[0].sPhoneNum,
+                    sMail: results[0].sMail,
+                    PositionID: results[0].PositionID,
+                    pName: results[0].pName
+                }
+                response.send(body);
+                response.end();
+            } else {
+                response.sendStatus(404);
+                response.end();
+            }
+            response.end();
+        });
+    } else {
+        throw error;
+    }
+});
+
 //add the router
 app.use('/', router);
 app.listen(process.env.port || 3001);
