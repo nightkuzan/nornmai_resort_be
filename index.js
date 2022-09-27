@@ -327,6 +327,35 @@ app.post('/staff/add', function (request, response) {
     }
 });
 
+app.get('/room', function (request, response) {
+    // Execute SQL query that'll select the account from the database based on the specified username and password
+    connection.query('select DISTINCT ri.RoomTypeID, r.RoomTypeName, ri.rNumBed, ri.rCapacity, ri.rImage, ri.rDescription, ri.rDefaultPrice from roominfo ri left join roomtype r on ri.RoomTypeID = r.RoomTypeID', function (error, results) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        if (results.length > 0) {
+            let dataResult = [];
+            for (let i = 0; i < results.length; i++) {
+                let body = {
+                    roomTypeID: results[i].RoomTypeID,
+                    roomTypeName: results[i].RoomTypeName,
+                    numBed: results[i].rNumBed,
+                    capacity: results[i].rCapacity,
+                    image: results[i].rImage,
+                    description: results[i].rDescription,
+                    price: results[i].rDefaultPrice
+                }
+                dataResult.push(body);
+            }
+            response.send(dataResult);
+            response.end();
+        } else {
+            throw error;
+        }
+        response.end();
+    });
+});
+
 //add the router
 app.use('/', router);
 app.listen(process.env.port || 3001);
