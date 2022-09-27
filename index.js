@@ -126,6 +126,17 @@ app.post('/login-admin', function (request, response) {
     }
 });
 
+app.get('/history', (req, res) => {
+    connection.query("SELECT ctUserID, mbTypeID, ctPoint FROM customerinfo", (err, result) => {
+        if (err){
+            console.log(err);
+        }
+        else{
+            res.send(result);
+            res.end();
+        }
+    });
+});
 //add the router
 app.use('/', router);
 app.listen(process.env.port || 3001);
