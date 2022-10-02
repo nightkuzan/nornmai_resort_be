@@ -200,6 +200,39 @@ app.get('/user-info', function (request, response) {
     });
 });
 
+app.get('/room-admin', function (request, response) {
+    let dataResult = [];
+    connection.query("SELECT r.RoomID, N.RoomTypeName, r.rStatus, r.rfloor, r.rCleaningState, r.rNumBed, r.rCapacity, r.rSize, r.rDefaultPrice, r.rImage, r.rDescription, r.rRating  FROM roominfo r left join roomtype N on r.RoomTypeID = N.RoomTypeID", function (error, results){
+        if (error) throw error;
+
+        if (results.length > 0) {
+            for (let i = 0; i < results.length; i++) {
+                let body = {
+                    RoomID: results[i].RoomID,
+                    RoomName: results[i].RoomTypeName,
+                    rStatus: results[i].rStatus,
+                    rfloor: results[i].rfloor,
+                    rCleaning: results[i].rCleaning,
+                    rNumbed: results[i].rNumBed,
+                    rCapacity: results[i].rCapacity,
+                    rSize: results[i].rSize,
+                    rDefaultPrice: results[i].rDefaultPrice,
+                    rImage: results[i].rImage,
+                    rDescription: results[i].rDescription,
+                    rRating: results[i].rRating,
+
+                }
+                dataResult.push(body);
+            }
+            response.send(dataResult);
+            response.end();
+        } else {
+            response.send(dataResult);
+            response.end();
+        }
+    })
+})
+
 app.get('/staff', function (request, response) {
     let dataResult = [];
     connection.query("SELECT s.StaffID, s.sFirstName, s.sLastName, s.sPhoneNum, s.sMail, p.pName FROM staffinfo s left join position p on p.PositionID = s.PositionID", function (error, results) {
