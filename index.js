@@ -356,6 +356,190 @@ app.get('/room', function (request, response) {
     });
 });
 
+app.get('/reserve-room', function (request, response) {
+    let checkin = request.query.checkin;
+    let checkout = request.query.checkout;
+    let type = request.query.type;
+
+    var from = new Date(checkin);
+    var to = new Date(checkout);
+
+    // loop for every day
+    let query = "select min(a.room_free) as roomFree, a.RoomTypeID, a.RoomTypeName, a.rDefaultPrice, a.rImage, a.rRating, a.rCapacity, a.rDescription from (";
+    for (var day = from; day <= to; day.setDate(day.getDate() + 1)) {
+        let date = moment(day).format('YYYY-MM-DD');
+        query += "select r.RoomTotal - count(b.BookingID) as room_free, r.RoomTypeID, r.RoomTypeName, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription from roomtype r " +
+            "left join (select DISTINCT RoomTypeID, rDefaultPrice, rImage, rRating, rCapacity, rDescription from roominfo) ri on ri.RoomTypeID = r.RoomTypeID " +
+            "left join bookinginfo b  on b.RoomTypeID = r.RoomTypeID and '" + date + "' BETWEEN b.bkCheckInDate and b.bkLeaveDate and b.bkLeaveDate != '" + date + "' and b.bkStatus != 'CANCEL' " +
+            "where b.bkReason is null " +
+            "group by r.RoomTypeID, r.RoomTypeName, r.RoomTotal, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription ";
+        if (day < to) {
+            query += "UNION ";
+        }
+    }
+    query += ") a GROUP by a.RoomTypeName, a.rDefaultPrice, a.rImage, a.rRating, a.rCapacity, a.RoomTypeID, a.rDescription HAVING a.RoomTypeID='" + type + "'";
+
+    // Execute SQL query that'll select the account from the database based on the specified username and password
+    connection.query(query, function (error, results) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        if (results.length > 0) {
+            let dataResult = [];
+            for (let i = 0; i < results.length; i++) {
+                let body = {
+                    roomTypeID: results[i].RoomTypeID,
+                    roomTypeName: results[i].RoomTypeName.toUpperCase(),
+                    capacity: results[i].rCapacity,
+                    freeRoom: results[i].roomFree,
+                    image: results[i].rImage,
+                    description: results[i].rDescription,
+                    price: results[i].rDefaultPrice
+                }
+                dataResult.push(body);
+            }
+            response.send(dataResult[0]);
+            response.end();
+        } else {
+            response.sendStatus(400);
+            response.end();
+        }
+        response.end();
+    });
+});
+
+app.get('/user-point', function (request, response) {
+    let userid = request.query.userid;
+    connection.query("SELECT c.ctPoint FROM customerinfo c WHERE c.ctUserID='" + userid + "'", function (error, results) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        if (results.length > 0) {
+            let body = {
+                ctPoint: results[0].ctPoint
+            }
+            response.send(body);
+            response.end();
+        } else {
+            response.sendStatus(400);
+            response.end();
+        }
+        response.end();
+    });
+});
+
+app.get('/discount', function (request, response) {
+    let dcCode = request.query.dcCode;
+    connection.query("SELECT s.dcRate FROM seasondiscount s WHERE s.dcStartDate <= CURRENT_DATE and s.dcEndDate >= CURRENT_DATE and s.dcCode ='" + dcCode + "'", function (error, results) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        if (results.length > 0) {
+            let body = {
+                dcRate: results[0].dcRate
+            }
+            response.send(body);
+            response.end();
+        } else {
+            response.sendStatus(400);
+            response.end();
+        }
+        response.end();
+    });
+});
+
+app.post('/reserve', function (request, response) {
+    let checkin = request.body.checkin;
+    let checkout = request.body.checkout;
+    let userid = request.body.userid;
+    let numPeople = request.body.numPeople;
+    let pointDiscount = request.body.pointDiscount;
+    let totalPrice = request.body.totalPrice;
+    let dcCode = request.body.dcCode;
+    let depositPrice = totalPrice * 40 / 100;
+    let point = totalPrice / 10;
+    let roomType = request.body.roomType;
+
+    // Ensure the input fields exists and are not empty
+    if (userid && roomType) {
+        // Execute SQL query that'll select the account from the database based on the specified username and password
+        connection.query("INSERT INTO `bookinginfo`(`ctUserID`, `bkCheckInDate`, `bkLeaveDate`, `bkNumPeople`, `bkpointDiscount`, `bkTotalPrice`, `dcCode`, `bkDeposit`, `bkStatus`, `bkGetPoint`, `RoomTypeID`) VALUES (?,?,?,?,?,?,?,?,'NOT PAID',?,?)",
+            [userid, checkin, checkout, numPeople, pointDiscount, totalPrice, dcCode, depositPrice, point, roomType],
+            function (error) {
+                // If there is an issue with the query, output the error
+                if (error) {
+                    throw error;
+                } else {
+                    connection.query("UPDATE `customerinfo` SET `ctPoint`=`ctPoint`-? WHERE ctUserID=?",
+                        [pointDiscount, userid],
+                        function (error) {
+                            // If there is an issue with the query, output the error
+                            if (error) {
+                                throw error;
+                            } else {
+                                response.sendStatus(200);
+                                response.end();
+                            }
+                        });
+                }
+            });
+    } else {
+        response.sendStatus(400);
+        response.end();
+    }
+});
+
+app.get('/reserve', function (request, response) {
+    let checkin = request.query.checkin;
+    let checkout = request.query.checkout;
+
+    var from = new Date(checkin);
+    var to = new Date(checkout);
+
+    // loop for every day
+    let query = "select min(a.room_free) as roomFree, a.RoomTypeID, a.RoomTypeName, a.rDefaultPrice, a.rImage, a.rRating, a.rCapacity, a.rDescription from (";
+    for (var day = from; day <= to; day.setDate(day.getDate() + 1)) {
+        let date = moment(day).format('YYYY-MM-DD');
+        query += "select r.RoomTotal - count(b.BookingID) as room_free, r.RoomTypeID, r.RoomTypeName, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription from roomtype r " +
+            "left join (select DISTINCT RoomTypeID, rDefaultPrice, rImage, rRating, rCapacity, rDescription from roominfo) ri on ri.RoomTypeID = r.RoomTypeID " +
+            "left join bookinginfo b  on b.RoomTypeID = r.RoomTypeID and '" + date + "' BETWEEN b.bkCheckInDate and b.bkLeaveDate and b.bkLeaveDate != '" + date + "' and b.bkStatus != 'CANCEL' " +
+            "where b.bkReason is null " +
+            "group by r.RoomTypeID, r.RoomTypeName, r.RoomTotal, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription ";
+        if (day < to) {
+            query += "UNION ";
+        }
+    }
+    query += ") a GROUP by a.RoomTypeName, a.rDefaultPrice, a.rImage, a.rRating, a.rCapacity, a.RoomTypeID, a.rDescription order by a.rDefaultPrice";
+
+    // Execute SQL query that'll select the account from the database based on the specified username and password
+    connection.query(query, function (error, results) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        if (results.length > 0) {
+            let dataResult = [];
+            for (let i = 0; i < results.length; i++) {
+                let body = {
+                    roomTypeID: results[i].RoomTypeID,
+                    roomTypeName: results[i].RoomTypeName,
+                    capacity: results[i].rCapacity,
+                    freeRoom: results[i].roomFree,
+                    image: results[i].rImage,
+                    description: results[i].rDescription,
+                    price: results[i].rDefaultPrice
+                }
+                dataResult.push(body);
+            }
+            response.send(dataResult);
+            response.end();
+        } else {
+            response.sendStatus(400);
+            response.end();
+        }
+        response.end();
+    });
+});
+
 //add the router
 app.use('/', router);
 app.listen(process.env.port || 3001);
