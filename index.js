@@ -136,6 +136,7 @@ app.get('/history', function (request, response) {
                 mbTypeID: results[0].mbTypeID,
                 ctPoint: results[0].ctPoint
             }
+            console.log(body);
             response.send(body);
             response.end();
         } else {
@@ -564,6 +565,40 @@ app.get('/reserve', function (request, response) {
                 dataResult.push(body);
             }
             response.send(dataResult);
+            response.end();
+        } else {
+            response.sendStatus(400);
+            response.end();
+        }
+        response.end();
+    });
+});
+
+app.get('/history2', function (request, response) {
+    let userid = request.query.userid;
+    connection.query("SELECT ROW_NUMBER() OVER () as rowId, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, case when c.cIntime is not null and c.cOuttime is not null and rw.ReviewID is null then 'Y' else 'N' end reviewOpen FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join reviewinfo rw on rw.BookingID = b.BookingID WHERE b.ctUserID='" + userid + "' order by b.BookingID desc", function (error, results) {
+        if (error) throw error;
+        if (results.length > 0) {
+            databooking = []
+            for (let i = 0; i < results.length; i++){
+            let body = {
+                bookingID: results[i].BookingID,
+                RoomTypeName: results[i].RoomTypeName,
+                bkCheckInDate: results[i].bkCheckInDate,
+                rfloor: results[i].rfloor,
+                bkLeaveDate: results[i].bkLeaveDate,
+                dcCode: results[i].dcCode,
+                bkpointDiscount: results[i].bkpointDiscount,
+                bkTotalPrice: results[i].bkTotalPrice,
+                bkGetPoint: results[i].bkGetPoint,
+                bkReason: results[i].bkReason,
+                bkStatus: results[i].bkStatus,
+                reviewOpen: results[i].reviewOpen
+            }
+            databooking.push(body);
+        }
+            // console.log(body);
+            response.send(databooking);
             response.end();
         } else {
             response.sendStatus(400);
