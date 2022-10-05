@@ -213,7 +213,7 @@ app.get('/room-admin', function (request, response) {
                     RoomName: results[i].RoomTypeName,
                     rStatus: results[i].rStatus,
                     rfloor: results[i].rfloor,
-                    rCleaning: results[i].rCleaning,
+                    rCleaning: results[i].rCleaningState,
                     rNumbed: results[i].rNumBed,
                     rCapacity: results[i].rCapacity,
                     rSize: results[i].rSize,
