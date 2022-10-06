@@ -574,9 +574,7 @@ app.get('/reserve', function (request, response) {
     });
 });
 
-<<<<<<< HEAD
 
-=======
 app.get('/history2', function (request, response) {
     let userid = request.query.userid;
     connection.query("SELECT ROW_NUMBER() OVER () as rowId, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, case when c.cIntime is not null and c.cOuttime is not null and rw.ReviewID is null then 'Y' else 'N' end reviewOpen FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join reviewinfo rw on rw.BookingID = b.BookingID WHERE b.ctUserID='" + userid + "' order by b.BookingID desc", function (error, results) {
@@ -610,7 +608,6 @@ app.get('/history2', function (request, response) {
         response.end();
     });
 });
->>>>>>> b0f3c41d2b4415282390f02b2a90e0301776570e
 
 //add the router
 app.use('/', router);
