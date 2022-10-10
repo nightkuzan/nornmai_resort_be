@@ -576,7 +576,7 @@ app.get('/reserve', function (request, response) {
 
 app.get('/history2', function (request, response) {
     let userid = request.query.userid;
-    connection.query("SELECT ROW_NUMBER() OVER () as rowId, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, case when c.cIntime is not null and c.cOuttime is not null and rw.ReviewID is null then 'Y' else 'N' end reviewOpen FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join reviewinfo rw on rw.BookingID = b.BookingID WHERE b.ctUserID='" + userid + "' order by b.BookingID desc", function (error, results) {
+    connection.query("SELECT DISTINCT ROW_NUMBER() OVER () as rowId, b.BookingID, r.RoomTypeName, b.bkCheckInDate, rn.rfloor, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, case when c.cIntime is not null and c.cOuttime is not null and rw.ReviewID is null then 'Y' else 'N' end reviewOpen FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join reviewinfo rw on rw.BookingID = b.BookingID left join roominfo rn on rn.RoomTypeID=r.RoomTypeID WHERE b.ctUserID='" + userid + "' group by b.BookingID desc", function (error, results) {
         if (error) throw error;
         if (results.length > 0) {
             databooking = []
@@ -602,6 +602,36 @@ app.get('/history2', function (request, response) {
             response.end();
         } else {
             response.sendStatus(400);
+            response.end();
+        }
+        response.end();
+    });
+});
+
+
+app.get('/review-cancel-info', function (request, response) {
+    let bookingid = request.query.bookingid;
+    ResultData = []
+    connection.query("SELECT DISTINCT b.bkCheckInDate, b.bkLeaveDate, rt.RoomTypeName, b.bkTotalPrice, b.dcCode, b.bkpointDiscount FROM bookinginfo b left join roomtype rt on b.RoomTypeID = rt.RoomTypeID WHERE b.BookingID=?", [bookingid], function (error, results) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        if (results.length > 0) {
+            for (let i = 0; i < results.length; i++) {
+                let body = {
+                    checkIn: results[i].bkCheckInDate,
+                    checkOut: results[i].bkLeaveDate,
+                    roomType: results[i].RoomTypeName,
+                    roomPrice: results[i].bkTotalPrice,
+                    dcCode: results[i].dcCode,
+                    usePoint: results[i].bkpointDiscount
+                }
+                ResultData.push(body);
+            }
+            response.send(ResultData[0]);
+            response.end();
+        } else {
+            response.send({});
             response.end();
         }
         response.end();
