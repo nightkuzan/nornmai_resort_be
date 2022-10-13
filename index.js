@@ -155,7 +155,6 @@ app.get("/history", function (request, response) {
           mbTypeID: results[0].mbTypeID,
           ctPoint: results[0].ctPoint,
         };
-        console.log(body);
         response.send(body);
         response.end();
       } else {
@@ -705,7 +704,6 @@ app.get("/history2", function (request, response) {
           };
           databooking.push(body);
         }
-        // console.log(body);
         response.send(databooking);
         response.end();
       } else {
@@ -730,8 +728,8 @@ app.get("/review-cancel-info", function (request, response) {
       if (results.length > 0) {
         for (let i = 0; i < results.length; i++) {
           let body = {
-            checkIn: results[i].bkCheckInDate,
-            checkOut: results[i].bkLeaveDate,
+            checkin: results[i].bkCheckInDate,
+            checkout: results[i].bkLeaveDate,
             roomType: results[i].RoomTypeName,
             roomPrice: results[i].bkTotalPrice,
             dcCode: results[i].dcCode,
@@ -745,7 +743,6 @@ app.get("/review-cancel-info", function (request, response) {
         response.send({});
         response.end();
       }
-      response.end();
     }
   );
 });
@@ -952,6 +949,57 @@ app.put('/check-out', function (request, response) {
     });
 });
 
+app.put("/update-reason-cancel", function (request, response) {
+    let reason = request.body.reason;
+    let bookingid = request.body.bookingid;
+    let userid = request.body.userid;
+  
+    // Ensure the input fields exists and are not empty
+    if (userid) {
+      // Execute SQL query that'll select the account from the database based on the specified username and password
+      connection.query(
+        "UPDATE bookinginfo SET bkReason=? WHERE BookingID = ?",
+        [reason, bookingid],
+        function (error) {
+          // If there is an issue with the query, output the error
+          if (error) {
+            throw error;
+          } else {
+            let body = {
+              bookingid: bookingid,
+            };
+            response.send(body);
+            response.end();
+          }
+        }
+      );
+    } else {
+      throw "error";
+    }
+  });
+
+  app.get("/reason", function (request, response) {
+    let userid = request.query.userid;
+    connection.query(
+      "SELECT b.bkReason FROM bookinginfo b where b.ctUserID ='" +
+        userid +
+        "'",
+      function (error, results) {
+        if (error) throw error;
+        if (results.length > 0) {
+          let body = {
+            bkReason: results[0].bkReason,
+          };
+          response.send(body);
+          response.end();
+        } else {
+          response.sendStatus(400);
+          response.end();
+        }
+        response.end();
+      }
+    );
+  });
 
 //add the router
 app.use("/", router);
