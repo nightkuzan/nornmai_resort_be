@@ -320,6 +320,41 @@ app.get("/payment", function (request, response) {
   );
 });
 
+app.get("/payment-update", function (request, response) {
+  let booking = request.query.bookingid;
+  let dataResult = [];
+  if (booking) {
+    connection.query(
+      "SELECT DISTINCT b.BookingID, b.bkCheckInDate, b.bkLeaveDate, b.bkTotalPrice, b.bkStatus, r.rImage FROM bookinginfo b, roomtype t left join roominfo r  on t.RoomTypeID = r.RoomTypeID WHERE t.RoomTypeID = b.RoomTypeID and b.BookingID='" +
+        booking +
+        "'",
+      function (error, results) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        if (results.length > 0) {
+          for (let i = 0; i < results.length; i++) {
+            let body = {
+              bookingid: results[i].BookingID,
+              bcheckin: results[i].bkCheckInDate,
+              bcheckout: results[i].bkLeaveDate,
+              price: results[i].bkTotalPrice,
+              status: results[i].bkStatus,
+              image: results[i].rImage,
+            };
+            dataResult.push(body);
+            response.send(dataResult[0]);
+            response.end();
+          }
+        } else {
+          response.send(dataResult);
+          response.end();
+        }
+      }
+    );
+  }
+});
+
 app.get("/staff", function (request, response) {
   let dataResult = [];
   connection.query(
