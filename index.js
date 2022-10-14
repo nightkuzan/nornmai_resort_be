@@ -7,6 +7,7 @@ const moment = require("moment");
 const mysql = require("mysql");
 
 const cors = require("cors");
+const { request, response } = require("express");
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -352,6 +353,28 @@ app.get("/payment-update", function (request, response) {
         }
       }
     );
+  }
+});
+
+app.put("/payment/update", function (request, response) {
+  let status = request.body.bkStatus;
+  let bookingid = request.body.bookingid;
+  if (bookingid) {
+    connection.query(
+      "UPDATE bookinginfo b SET b.bkStatus = ? WHERE b.BookingID = ?",
+      [status, bookingid],
+      function (error) {
+        // If there is an issue with the query, output the error
+        if (error) {
+          throw error;
+        } else {
+          response.sendStatus(200);
+          response.end();
+        }
+      }
+    );
+  } else {
+    throw "error";
   }
 });
 
