@@ -356,21 +356,27 @@ app.get("/payment-update", function (request, response) {
   }
 });
 
-app.put("/payment/update", function (request, response) {
+app.post("/payment/update", function (request, response) {
   let status = request.body.bkStatus;
   let bookingid = request.body.bookingid;
+  let price = request.body.price;
+  let pDate = request.body.date;
+  let staff = request.body.staffid;
+  //"INSERT INTO paymentinfo(BookingID, pAmount, pDate, StaffID) VALUES (?,?,?,?)"
   if (bookingid) {
     connection.query(
-      "UPDATE bookinginfo b SET b.bkStatus = ? WHERE b.BookingID = ?",
-      [status, bookingid],
-      function (error) {
+      "INSERT INTO paymentinfo(BookingID, pAmount, pDate, StaffID) VALUES (?,?,?,?)",
+      [bookingid, price, pDate, staff],
+      function (error, res) {
         // If there is an issue with the query, output the error
-        if (error) {
-          throw error;
-        } else {
-          response.sendStatus(200);
-          response.end();
-        }
+        if (error) throw error;
+        // If the account exists
+        connection.query(
+          "UPDATE bookinginfo b SET b.bkStatus = ? WHERE b.BookingID = ?",
+          [status, bookingid]
+        );
+        response.sendStatus(200);
+        response.end();
       }
     );
   } else {
