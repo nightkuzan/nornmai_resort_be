@@ -7,6 +7,7 @@ const moment = require("moment");
 const mysql = require("mysql");
 
 const cors = require("cors");
+const { request, response } = require("express");
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -318,6 +319,69 @@ app.get("/payment", function (request, response) {
       }
     }
   );
+});
+
+app.get("/payment-update", function (request, response) {
+  let booking = request.query.bookingid;
+  let dataResult = [];
+  if (booking) {
+    connection.query(
+      "SELECT DISTINCT b.BookingID, b.bkCheckInDate, b.bkLeaveDate, b.bkTotalPrice, b.bkStatus, r.rImage FROM bookinginfo b, roomtype t left join roominfo r  on t.RoomTypeID = r.RoomTypeID WHERE t.RoomTypeID = b.RoomTypeID and b.BookingID='" +
+        booking +
+        "'",
+      function (error, results) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        if (results.length > 0) {
+          for (let i = 0; i < results.length; i++) {
+            let body = {
+              bookingid: results[i].BookingID,
+              bcheckin: results[i].bkCheckInDate,
+              bcheckout: results[i].bkLeaveDate,
+              price: results[i].bkTotalPrice,
+              status: results[i].bkStatus,
+              image: results[i].rImage,
+            };
+            dataResult.push(body);
+            response.send(dataResult[0]);
+            response.end();
+          }
+        } else {
+          response.send(dataResult);
+          response.end();
+        }
+      }
+    );
+  }
+});
+
+app.post("/payment/update", function (request, response) {
+  let status = request.body.bkStatus;
+  let bookingid = request.body.bookingid;
+  let price = request.body.price;
+  let pDate = request.body.date;
+  let staff = request.body.staffid;
+  //"INSERT INTO paymentinfo(BookingID, pAmount, pDate, StaffID) VALUES (?,?,?,?)"
+  if (bookingid) {
+    connection.query(
+      "INSERT INTO paymentinfo(BookingID, pAmount, pDate, StaffID) VALUES (?,?,?,?)",
+      [bookingid, price, pDate, staff],
+      function (error, res) {
+        // If there is an issue with the query, output the error
+        if (error) throw error;
+        // If the account exists
+        connection.query(
+          "UPDATE bookinginfo b SET b.bkStatus = ? WHERE b.BookingID = ?",
+          [status, bookingid]
+        );
+        response.sendStatus(200);
+        response.end();
+      }
+    );
+  } else {
+    throw "error";
+  }
 });
 
 app.get("/staff", function (request, response) {
@@ -839,56 +903,58 @@ app.post("/discount/add", function (request, response) {
 });
 
 app.put("/update-reason-cancel", function (request, response) {
-    let reason = request.body.reason;
-    let bookingid = request.body.bookingid;
-    let userid = request.body.userid;
-  
-    // Ensure the input fields exists and are not empty
-    if (userid) {
-      // Execute SQL query that'll select the account from the database based on the specified username and password
-      connection.query(
-        "UPDATE bookinginfo SET bkReason=? WHERE BookingID = ?",
-        [reason, bookingid],
-        function (error) {
-          // If there is an issue with the query, output the error
-          if (error) {
-            throw error;
-          } else {
-            let body = {
-              bookingid: bookingid,
-            };
-            response.send(body);
-            response.end();
-          }
-        }
-      );
-    } else {
-      throw "error";
-    }
-  });
+  let reason = request.body.reason;
+  let bookingid = request.body.bookingid;
+  let userid = request.body.userid;
 
-  app.get("/reason", function (request, response) {
-    let userid = request.query.userid;
+  // Ensure the input fields exists and are not empty
+  if (userid) {
+    // Execute SQL query that'll select the account from the database based on the specified username and password
     connection.query(
-      "SELECT b.bkReason FROM bookinginfo b where b.ctUserID ='" +
-        userid +
-        "'",
-      function (error, results) {
-        if (error) throw error;
-        if (results.length > 0) {
+      "UPDATE bookinginfo SET bkReason=? WHERE BookingID = ?",
+      [reason, bookingid],
+      function (error) {
+        // If there is an issue with the query, output the error
+        if (error) {
+          throw error;
+        } else {
           let body = {
-            bkReason: results[0].bkReason,
+            bookingid: bookingid,
           };
           response.send(body);
           response.end();
-        } else {
-          response.sendStatus(400);
-          response.end();
         }
-        response.end();
       }
     );
+<<<<<<< HEAD
   });
+=======
+  } else {
+    throw "error";
+  }
+});
+
+app.get("/reason", function (request, response) {
+  let userid = request.query.userid;
+  connection.query(
+    "SELECT b.bkReason FROM bookinginfo b where b.ctUserID ='" + userid + "'",
+    function (error, results) {
+      if (error) throw error;
+      if (results.length > 0) {
+        let body = {
+          bkReason: results[0].bkReason,
+        };
+        response.send(body);
+        response.end();
+      } else {
+        response.sendStatus(400);
+        response.end();
+      }
+      response.end();
+    }
+  );
+});
+>>>>>>> 37176ecd4f15d0ad3ae2cd2bccc4e19432afda30
 app.get("/check", function (request, response) {
   let search = request.query.search;
   let condition =
@@ -1017,7 +1083,7 @@ app.get("/check-info-out", function (request, response) {
       if (results.length > 0) {
         for (let i = 0; i < results.length; i++) {
           connection.query(
-            "select p.pMethod, p.pDate from paymentinfo p where p.BookingID = ? order by p.pChargesID desc limit 1",
+            "select p.pDate from paymentinfo p where p.BookingID = ? order by p.pChargesID desc limit 1",
             [bookingid],
             function (err, res) {
               let body = {
@@ -1026,7 +1092,7 @@ app.get("/check-info-out", function (request, response) {
                 cIntime: results[i].cIntime,
                 cInpeople: results[i].ctFullname,
                 BookingID: results[i].BookingID,
-                paymentMethod: res[0].pMethod,
+                // paymentMethod: res[0].pMethod,
                 paymentDate: res[0].pDate,
                 rImage: results[i].rImage,
                 checkin: results[i].bkCheckInDate,
