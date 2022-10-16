@@ -838,7 +838,6 @@ app.post("/discount/add", function (request, response) {
   }
 });
 
-<<<<<<< HEAD
 app.put("/update-reason-cancel", function (request, response) {
     let reason = request.body.reason;
     let bookingid = request.body.bookingid;
@@ -890,7 +889,6 @@ app.put("/update-reason-cancel", function (request, response) {
       }
     );
   });
-=======
 app.get("/check", function (request, response) {
   let search = request.query.search;
   let condition =
@@ -1090,7 +1088,6 @@ app.put("/check-out", function (request, response) {
     }
   );
 });
->>>>>>> 6d708120df39539f0293dcbda501a5755db6e8aa
 
 //add the router
 app.use("/", router);
