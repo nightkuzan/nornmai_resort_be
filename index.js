@@ -899,8 +899,8 @@ app.get("/discount-info", function (request, response) {
           let body = {
             dcCode: results[i].dcCode,
             dcRate: results[i].dcRate,
-            startDate: results[i].startDate,
-            endDate: results[i].endDate,
+            startDate: results[i].dcStartDate,
+            endDate: results[i].dcEndDate,
           };
           dataResult.push(body);
         }
