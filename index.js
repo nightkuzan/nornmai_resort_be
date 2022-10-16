@@ -1079,7 +1079,7 @@ app.get("/check-info-out", function (request, response) {
       if (results.length > 0) {
         for (let i = 0; i < results.length; i++) {
           connection.query(
-            "select p.pMethod, p.pDate from paymentinfo p where p.BookingID = ? order by p.pChargesID desc limit 1",
+            "select p.pDate from paymentinfo p where p.BookingID = ? order by p.pChargesID desc limit 1",
             [bookingid],
             function (err, res) {
               let body = {
@@ -1088,7 +1088,7 @@ app.get("/check-info-out", function (request, response) {
                 cIntime: results[i].cIntime,
                 cInpeople: results[i].ctFullname,
                 BookingID: results[i].BookingID,
-                paymentMethod: res[0].pMethod,
+                // paymentMethod: res[0].pMethod,
                 paymentDate: res[0].pDate,
                 rImage: results[i].rImage,
                 checkin: results[i].bkCheckInDate,
