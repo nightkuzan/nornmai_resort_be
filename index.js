@@ -1215,7 +1215,6 @@ app.put("/check-out", function (request, response) {
   );
 });
 
-<<<<<<< HEAD
 app.post("/review-room", function (request, response) {
   let userid = request.body.bookingid;
   let bookingid = request.body.bookingid;
@@ -1283,46 +1282,6 @@ app.get("/allbooking", function (request, response) {
       }
     }
   );
-=======
-app.get('/admin', function (request, response) {
-  let search = request.query.search;
-  let condition = '';
-  if (search != null && search != '') {
-      condition = " WHERE ct.ctFirstName like '%" + search + "%' OR ct.ctLastName like '%" + search + "%' OR b.bkStatus like '%" + search + "%' OR b.BookingID='" + search + "' OR b.bkTotalPrice='" + search + "' OR b.bkCheckInDate='" + search + "'";
-  }
-  connection.query("SELECT ROW_NUMBER() OVER () as rowId, ct.ctUserID, concat(ct.ctFirstName,' ',ct.ctLastName) as ctFullname, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime, rw.rvComment, rw.rvScore FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join customerinfo ct on ct.ctUserID = b.ctUserID left join reviewinfo rw on rw.BookingID = b.BookingID " + condition + " order by b.BookingID desc", function (error, results) {
-      // If there is an issue with the query, output the error
-      if (error) throw error;
-      // If the account exists
-      let dataResult = [];
-      if (results.length > 0) {
-          for (let i = 0; i < results.length; i++) {
-              let body = {
-                  rowId: results[i].rowId,
-                  ctUserID: results[i].ctUserID,
-                  ctFullname: results[i].ctFullname,
-                  BookingID: results[i].BookingID,
-                  RoomTypeName: results[i].RoomTypeName,
-                  checkin: results[i].bkCheckInDate,
-                  checkout: results[i].bkLeaveDate,
-                  dcCode: results[i].dcCode,
-                  point: results[i].bkpointDiscount,
-                  price: results[i].bkTotalPrice,
-                  getPoint: results[i].bkGetPoint,
-                  reason: results[i].bkReason,
-                  status: results[i].bkStatus,
-                  cIntime: results[i].cIntime,
-                  cOuttime: results[i].cOuttime,
-                  rvComment: results[i].rvComment,
-                  rvScore: results[i].rvScore
-              }
-              dataResult.push(body);
-          }
-      }
-      response.send(dataResult);
-      response.end();
-  });
->>>>>>> 925b3e01c6cb54eea2c2f17c7ce65274fd04c6c3
 });
 
 //add the router
