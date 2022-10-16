@@ -370,8 +370,8 @@ app.post("/payment/update", function (request, response) {
       function (error, res) {
         // If there is an issue with the query, output the error
         if (error) throw error;
-        if (results.length > 0) {
-          let ctTotalConsumption = results[0].ctTotalConsumption;
+        if (res.length > 0) {
+          let ctTotalConsumption = res[0].ctTotalConsumption;
           let rank = 'GU231';
           if (ctTotalConsumption > 0 && ctTotalConsumption < 30000) {
               rank = 'SI232';
