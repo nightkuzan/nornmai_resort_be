@@ -819,7 +819,7 @@ app.get("/review-cancel-info", function (request, response) {
   let bookingid = request.query.bookingid;
   ResultData = [];
   connection.query(
-    "SELECT DISTINCT b.bkCheckInDate, b.bkLeaveDate, rt.RoomTypeName, b.bkTotalPrice, b.dcCode, b.bkpointDiscount FROM bookinginfo b left join roomtype rt on b.RoomTypeID = rt.RoomTypeID WHERE b.BookingID=?",
+    "SELECT DISTINCT b.bkCheckInDate, b.bkLeaveDate, rt.RoomTypeName, b.bkTotalPrice, b.dcCode, b.bkpointDiscount, cn.RoomID FROM bookinginfo b left join roomtype rt on b.RoomTypeID = rt.RoomTypeID left join checkinfo cn on b.BookingID = cn.BookingID WHERE b.BookingID=?",
     [bookingid],
     function (error, results) {
       // If there is an issue with the query, output the error
@@ -834,6 +834,7 @@ app.get("/review-cancel-info", function (request, response) {
             roomPrice: results[i].bkTotalPrice,
             dcCode: results[i].dcCode,
             usePoint: results[i].bkpointDiscount,
+            roomid: results[0].RoomID
           };
           ResultData.push(body);
         }
@@ -911,8 +912,8 @@ app.put("/update-reason-cancel", function (request, response) {
   if (userid) {
     // Execute SQL query that'll select the account from the database based on the specified username and password
     connection.query(
-      "UPDATE bookinginfo SET bkReason=? WHERE BookingID = ?",
-      [reason, bookingid],
+      "UPDATE bookinginfo SET bkReason=?, bkStatus=? WHERE BookingID = ?",
+      [reason, 'Cancel', bookingid],
       function (error) {
         // If there is an issue with the query, output the error
         if (error) {
@@ -926,9 +927,6 @@ app.put("/update-reason-cancel", function (request, response) {
         }
       }
     );
-<<<<<<< HEAD
-  });
-=======
   } else {
     throw "error";
   }
@@ -954,7 +952,6 @@ app.get("/reason", function (request, response) {
     }
   );
 });
->>>>>>> 37176ecd4f15d0ad3ae2cd2bccc4e19432afda30
 app.get("/check", function (request, response) {
   let search = request.query.search;
   let condition =
@@ -1151,6 +1148,75 @@ app.put("/check-out", function (request, response) {
       );
       response.sendStatus(200);
       response.end();
+    }
+  );
+});
+
+app.post("/review-room", function (request, response) {
+  let userid = request.body.bookingid;
+  let bookingid = request.body.bookingid;
+  let review = request.body.review;
+  let rate = request.body.rate;
+  let rvtime = request.body.rvtime;
+  let roomid = request.body.roomid;
+
+  // Ensure the input fields exists and are not empty
+  if (bookingid) {
+    // Execute SQL query that'll select the account from the database based on the specified username and password
+    connection.query(
+      "INSERT INTO reviewinfo(BookingID, rvComment, rvScore, rvTime, RoomID) VALUES (?,?,?,?,?)",
+      [bookingid, review, rate, rvtime, roomid],
+      function (error) {
+        // If there is an issue with the query, output the error
+        if (error) {
+          throw error;
+        } else {
+          response.sendStatus(200);
+          response.end();
+        }
+      }
+    );
+  } else {
+    throw "error";
+  }
+});
+
+app.get("/allbooking", function (request, response) {
+  let dataResult = [];
+  connection.query(
+    "SELECT b.ctUserID, ct.ctFirstName, ct.ctLastName, b.BookingID, rt.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount,b.bkTotalPrice, b.bkGetPoint, cn.cIntime, cn.cOuttime, b.bkReason, b.bkStatus, rn.rvComment, rn.rvScore FROM bookinginfo b left join reviewinfo rn on b.BookingID=rn.BookingID left join checkinfo cn on cn.BookingID=b.BookingID left join roomtype rt on b.RoomTypeID=rt.RoomTypeID left join customerinfo ct on ct.ctUserID=b.ctUserID ORDER BY b.BookingID ASC",
+    function (error, results) {
+      if (error) throw error;
+
+      if (results.length > 0) {
+        for (let i = 0; i < results.length; i++) {
+          let body = {
+            cid: results[i].ctUserID,
+            fname: results[i].ctFirstName,
+            lname: results[i].ctLastName,
+            bookid: results[i].BookingID,
+            rtname: results[i].RoomTypeName,
+            bcheckin: results[i].bkCheckInDate,
+            bcheckout: results[i].bkLeaveDate,
+            discount: results[i].dcCode,
+            pdiscount: results[i].bkpointDiscount,
+            totalprice: results[i].bkTotalPrice,
+            getpoint: results[i].bkGetPoint,
+            checkin: results[i].cIntime,
+            checkout: results[i].cOuttime,
+            reason: results[i].bkReason,
+            bkstatus: results[i].bkStatus,
+            review: results[i].rvComment,
+            rate: results[i].rvScore
+          };
+          dataResult.push(body);
+        }
+        response.send(dataResult);
+        response.end();
+      } else {
+        response.send(dataResult);
+        response.end();
+      }
     }
   );
 });
