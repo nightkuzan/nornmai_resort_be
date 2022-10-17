@@ -1215,35 +1215,6 @@ app.put("/check-out", function (request, response) {
   );
 });
 
-app.post("/review-room", function (request, response) {
-  let userid = request.body.bookingid;
-  let bookingid = request.body.bookingid;
-  let review = request.body.review;
-  let rate = request.body.rate;
-  let rvtime = request.body.rvtime;
-  let roomid = request.body.roomid;
-
-  // Ensure the input fields exists and are not empty
-  if (bookingid) {
-    // Execute SQL query that'll select the account from the database based on the specified username and password
-    connection.query(
-      "INSERT INTO reviewinfo(BookingID, rvComment, rvScore, rvTime, RoomID) VALUES (?,?,?,?,?)",
-      [bookingid, review, rate, rvtime, roomid],
-      function (error) {
-        // If there is an issue with the query, output the error
-        if (error) {
-          throw error;
-        } else {
-          response.sendStatus(200);
-          response.end();
-        }
-      }
-    );
-  } else {
-    throw "error";
-  }
-});
-
 app.get("/allbooking", function (request, response) {
   let dataResult = [];
   connection.query(
