@@ -142,41 +142,45 @@ app.post("/login-admin", function (request, response) {
   }
 });
 
-
-app.get('/history', function (request, response) {
+app.get("/history", function (request, response) {
   let userid = request.query.userid;
-  connection.query("SELECT ROW_NUMBER() OVER () as rowId, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, case when c.cIntime is not null and c.cOuttime is not null and rw.ReviewID is null then 'Y' else 'N' end reviewOpen FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join reviewinfo rw on rw.BookingID = b.BookingID WHERE b.ctUserID='" + userid + "' order by b.BookingID desc", function (error, results) {
+  connection.query(
+    "SELECT ROW_NUMBER() OVER () as rowId, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, case when c.cIntime is not null and c.cOuttime is not null and rw.ReviewID is null then 'Y' else 'N' end reviewOpen FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join reviewinfo rw on rw.BookingID = b.BookingID WHERE b.ctUserID='" +
+      userid +
+      "' order by b.BookingID desc",
+    function (error, results) {
       // If there is an issue with the query, output the error
       if (error) throw error;
       // If the account exists
       if (results.length > 0) {
-          let dataResult = [];
-          for (let i = 0; i < results.length; i++) {
-              let body = {
-                  rowId: results[i].rowId,
-                  BookingID: results[i].BookingID,
-                  RoomTypeName: results[i].RoomTypeName,
-                  checkin: results[i].bkCheckInDate,
-                  checkout: results[i].bkLeaveDate,
-                  dcCode: results[i].dcCode,
-                  point: results[i].bkpointDiscount,
-                  price: results[i].bkTotalPrice,
-                  getPoint: results[i].bkGetPoint,
-                  cancelFlag: results[i].bkReason == null ? 'N' : 'Y',
-                  reason: results[i].bkReason,
-                  status: results[i].bkStatus,
-                  reviewOpen: results[i].reviewOpen
-              }
-              dataResult.push(body);
-          }
-          response.send(dataResult);
-          response.end();
+        let dataResult = [];
+        for (let i = 0; i < results.length; i++) {
+          let body = {
+            rowId: results[i].rowId,
+            BookingID: results[i].BookingID,
+            RoomTypeName: results[i].RoomTypeName,
+            checkin: results[i].bkCheckInDate,
+            checkout: results[i].bkLeaveDate,
+            dcCode: results[i].dcCode,
+            point: results[i].bkpointDiscount,
+            price: results[i].bkTotalPrice,
+            getPoint: results[i].bkGetPoint,
+            cancelFlag: results[i].bkReason == null ? "N" : "Y",
+            reason: results[i].bkReason,
+            status: results[i].bkStatus,
+            reviewOpen: results[i].reviewOpen,
+          };
+          dataResult.push(body);
+        }
+        response.send(dataResult);
+        response.end();
       } else {
-          response.sendStatus(400);
-          response.end();
+        response.sendStatus(400);
+        response.end();
       }
       response.end();
-  });
+    }
+  );
 });
 app.put("/update-user", function (request, response) {
   let firstname = request.body.firstname;
@@ -240,58 +244,72 @@ app.get("/user-info", function (request, response) {
   );
 });
 
-app.get('/room-booking', function (request, response) {
+app.get("/room-booking", function (request, response) {
   let userid = request.query.userid;
   let bookingid = request.query.bookingid;
-  connection.query("SELECT b.BookingID, r.RoomTypeID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime, c.RoomID FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID WHERE b.ctUserID='" + userid + "' AND b.BookingID='" + bookingid + "'", function (error, results) {
+  connection.query(
+    "SELECT b.BookingID, r.RoomTypeID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime, c.RoomID FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID WHERE b.ctUserID='" +
+      userid +
+      "' AND b.BookingID='" +
+      bookingid +
+      "'",
+    function (error, results) {
       // If there is an issue with the query, output the error
       if (error) throw error;
       // If the account exists
       if (results.length > 0) {
-          let dataResult = [];
-          for (let i = 0; i < results.length; i++) {
-              let body = {
-                  rowId: results[i].rowId,
-                  BookingID: results[i].BookingID,
-                  RoomTypeID: results[i].RoomTypeID,
-                  RoomTypeName: results[i].RoomTypeName,
-                  checkin: results[i].bkCheckInDate,
-                  checkout: results[i].bkLeaveDate,
-                  dcCode: results[i].dcCode,
-                  point: results[i].bkpointDiscount,
-                  price: results[i].bkTotalPrice,
-                  getPoint: results[i].bkGetPoint,
-                  reason: results[i].bkReason,
-                  status: results[i].bkStatus,
-                  cIntime: results[i].cIntime,
-                  cOuttime: results[i].cOuttime,
-                  RoomID: results[i].RoomID
-              }
-              dataResult.push(body);
-          }
-          response.send(dataResult[0]);
-          response.end();
+        let dataResult = [];
+        for (let i = 0; i < results.length; i++) {
+          let body = {
+            rowId: results[i].rowId,
+            BookingID: results[i].BookingID,
+            RoomTypeID: results[i].RoomTypeID,
+            RoomTypeName: results[i].RoomTypeName,
+            checkin: results[i].bkCheckInDate,
+            checkout: results[i].bkLeaveDate,
+            dcCode: results[i].dcCode,
+            point: results[i].bkpointDiscount,
+            price: results[i].bkTotalPrice,
+            getPoint: results[i].bkGetPoint,
+            reason: results[i].bkReason,
+            status: results[i].bkStatus,
+            cIntime: results[i].cIntime,
+            cOuttime: results[i].cOuttime,
+            RoomID: results[i].RoomID,
+          };
+          dataResult.push(body);
+        }
+        response.send(dataResult[0]);
+        response.end();
       } else {
-          response.sendStatus(400);
-          response.end();
+        response.sendStatus(400);
+        response.end();
       }
       response.end();
-  });
+    }
+  );
 });
 
-app.post('/review-room', function (request, response) {
+app.post("/review-room", function (request, response) {
   let bookingid = request.body.bookingid;
   let review = request.body.review;
   let star = request.body.star;
   let roomid = request.body.roomid;
   let roomtype = request.body.roomtype;
-  connection.query("INSERT INTO reviewinfo(BookingID, rvComment, rvScore, RoomID) VALUES (?,?,?,?)", [bookingid, review, star, roomid], function (error, results) {
+  connection.query(
+    "INSERT INTO reviewinfo(BookingID, rvComment, rvScore, RoomID) VALUES (?,?,?,?)",
+    [bookingid, review, star, roomid],
+    function (error, results) {
       // If there is an issue with the query, output the error
-      if (error) throw (error);
-      connection.query("UPDATE roominfo SET rRating=(select AVG(r.rvScore) from reviewinfo r where r.RoomID in (select RoomID from roominfo where RoomTypeID = ?)) where RoomTypeID = ?", [roomtype, roomtype]);
+      if (error) throw error;
+      connection.query(
+        "UPDATE roominfo SET rRating=(select AVG(r.rvScore) from reviewinfo r where r.RoomID in (select RoomID from roominfo where RoomTypeID = ?)) where RoomTypeID = ?",
+        [roomtype, roomtype]
+      );
       response.sendStatus(200);
       response.end();
-  });
+    }
+  );
 });
 app.get("/room-admin", function (request, response) {
   let dataResult = [];
@@ -328,6 +346,40 @@ app.get("/room-admin", function (request, response) {
   );
 });
 
+app.get("/room-admin/roomid", function (request, response) {
+  // roomid from params in request
+  let roomID = request.query.roomId;
+  connection.query(
+    "SELECT r.RoomID, N.RoomTypeName, r.rStatus, r.rfloor, r.rCleaningState, r.rNumBed, r.rCapacity, r.rSize, r.rDefaultPrice, r.rImage, r.rDescription, r.rRating  FROM roominfo r left join roomtype N on r.RoomTypeID = N.RoomTypeID WHERE r.RoomID = ?",
+    [roomID],
+    function (error, results) {
+      if (error) {
+        console.log(error);
+      }
+
+      if (results) {
+        response.send(results);
+        response.end();
+      } else {
+        response.sendStatus(400);
+        response.end();
+      }
+    }
+  );
+});
+
+app.put("/room-admin", function (request, response) {
+  let roomID = request.body.RoomID;
+  let roomName = request.body.RoomName;
+  let rfloor = request.body.rfloor;
+  let rNumbed = request.body.rNumbed;
+  let rCapacity = request.body.rCapacity;
+  let rDefaultPrice = request.body.rDefaultPrice;
+  let rImage = request.body.rImage;
+  let rDescription = request.body.rDescription;
+  connection.query()
+});
+
 app.put("/room/clean", function (request, response) {
   let roomID = request.body.RoomID;
   if (roomID) {
@@ -348,117 +400,156 @@ app.put("/room/clean", function (request, response) {
     throw "error";
   }
 });
-app.get('/payment', function (request, response) {
+app.get("/payment", function (request, response) {
   let search = request.query.search;
   let condition = "WHERE b.bkStatus != 'CANCEL'";
-  if (search != null && search != '') {
-      condition += " AND ct.ctFirstName like '%" + search + "%' OR ct.ctLastName like '%" + search + "%' OR b.bkStatus like '%" + search + "%' OR b.BookingID='" + search + "' OR b.bkTotalPrice='" + search + "' OR b.bkCheckInDate='" + search + "'";
+  if (search != null && search != "") {
+    condition +=
+      " AND ct.ctFirstName like '%" +
+      search +
+      "%' OR ct.ctLastName like '%" +
+      search +
+      "%' OR b.bkStatus like '%" +
+      search +
+      "%' OR b.BookingID='" +
+      search +
+      "' OR b.bkTotalPrice='" +
+      search +
+      "' OR b.bkCheckInDate='" +
+      search +
+      "'";
   }
-  connection.query("SELECT ROW_NUMBER() OVER () as rowId, ct.ctUserID, concat(ct.ctFirstName,' ',ct.ctLastName) as ctFullname, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join customerinfo ct on ct.ctUserID = b.ctUserID " + condition + " order by b.BookingID desc", function (error, results) {
+  connection.query(
+    "SELECT ROW_NUMBER() OVER () as rowId, ct.ctUserID, concat(ct.ctFirstName,' ',ct.ctLastName) as ctFullname, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join customerinfo ct on ct.ctUserID = b.ctUserID " +
+      condition +
+      " order by b.BookingID desc",
+    function (error, results) {
       // If there is an issue with the query, output the error
       if (error) throw error;
       // If the account exists
       let dataResult = [];
       if (results.length > 0) {
-          for (let i = 0; i < results.length; i++) {
-              let body = {
-                  rowId: results[i].rowId,
-                  ctUserID: results[i].ctUserID,
-                  ctFullname: results[i].ctFullname,
-                  BookingID: results[i].BookingID,
-                  RoomTypeName: results[i].RoomTypeName,
-                  checkin: results[i].bkCheckInDate,
-                  checkout: results[i].bkLeaveDate,
-                  dcCode: results[i].dcCode,
-                  point: results[i].bkpointDiscount,
-                  price: results[i].bkTotalPrice,
-                  getPoint: results[i].bkGetPoint,
-                  reason: results[i].bkReason,
-                  status: results[i].bkStatus,
-                  cIntime: results[i].cIntime,
-                  cOuttime: results[i].cOuttime
-              }
-              dataResult.push(body);
-          }
+        for (let i = 0; i < results.length; i++) {
+          let body = {
+            rowId: results[i].rowId,
+            ctUserID: results[i].ctUserID,
+            ctFullname: results[i].ctFullname,
+            BookingID: results[i].BookingID,
+            RoomTypeName: results[i].RoomTypeName,
+            checkin: results[i].bkCheckInDate,
+            checkout: results[i].bkLeaveDate,
+            dcCode: results[i].dcCode,
+            point: results[i].bkpointDiscount,
+            price: results[i].bkTotalPrice,
+            getPoint: results[i].bkGetPoint,
+            reason: results[i].bkReason,
+            status: results[i].bkStatus,
+            cIntime: results[i].cIntime,
+            cOuttime: results[i].cOuttime,
+          };
+          dataResult.push(body);
+        }
       }
       response.send(dataResult);
       response.end();
-  });
+    }
+  );
 });
-app.post('/payment', function (request, response) {
+app.post("/payment", function (request, response) {
   let booking = request.body.bookingid;
   let amount = request.body.amount;
   let date = request.body.date;
   let staffid = request.body.staffid;
   let status = request.body.status;
   let userid = request.body.userid;
-  connection.query("INSERT INTO paymentinfo(BookingID, pAmount, pDate, StaffID) VALUES (?,?,?,?)", [booking,amount, date, staffid], function (error, res) {
+  connection.query(
+    "INSERT INTO paymentinfo(BookingID, pAmount, pDate, StaffID) VALUES (?,?,?,?)",
+    [booking, amount, date, staffid],
+    function (error, res) {
       // If there is an issue with the query, output the error
       if (error) throw error;
       // If the account exists
-      connection.query("UPDATE bookinginfo SET bkStatus= ? WHERE BookingID = ?", [status, booking]);
-      if (status === 'FULLY PAID') {
-          connection.query("UPDATE customerinfo c set c.ctPoint = c.ctPoint + (select b.bkGetPoint from bookinginfo b where b.BookingID = ?), c.ctTotalConsumption = c.ctTotalConsumption + (select b.bkTotalPrice from bookinginfo b where b.BookingID = ?) where c.ctUserID = ?", [booking, booking, userid]);
-          connection.query("select c.ctTotalConsumption from customerinfo c where c.ctUserID = ?", [userid], function (error, results) {
-              if (error) throw error;
-              if (results.length > 0) {
-                  let ctTotalConsumption = results[0].ctTotalConsumption;
-                  let rank = 'GU231';
-                  if (ctTotalConsumption > 0 && ctTotalConsumption < 30000) {
-                      rank = 'SI232';
-                  } else if (ctTotalConsumption < 100000) {
-                      rank = 'GO233';
-                  } else if (ctTotalConsumption > 100000) {
-                      rank = 'PL234';
-                  }
-                  connection.query("UPDATE customerinfo c set c.mbTypeID = ? WHERE c.ctUserID = ?", [rank, userid]);
+      connection.query(
+        "UPDATE bookinginfo SET bkStatus= ? WHERE BookingID = ?",
+        [status, booking]
+      );
+      if (status === "FULLY PAID") {
+        connection.query(
+          "UPDATE customerinfo c set c.ctPoint = c.ctPoint + (select b.bkGetPoint from bookinginfo b where b.BookingID = ?), c.ctTotalConsumption = c.ctTotalConsumption + (select b.bkTotalPrice from bookinginfo b where b.BookingID = ?) where c.ctUserID = ?",
+          [booking, booking, userid]
+        );
+        connection.query(
+          "select c.ctTotalConsumption from customerinfo c where c.ctUserID = ?",
+          [userid],
+          function (error, results) {
+            if (error) throw error;
+            if (results.length > 0) {
+              let ctTotalConsumption = results[0].ctTotalConsumption;
+              let rank = "GU231";
+              if (ctTotalConsumption > 0 && ctTotalConsumption < 30000) {
+                rank = "SI232";
+              } else if (ctTotalConsumption < 100000) {
+                rank = "GO233";
+              } else if (ctTotalConsumption > 100000) {
+                rank = "PL234";
               }
-          });
+              connection.query(
+                "UPDATE customerinfo c set c.mbTypeID = ? WHERE c.ctUserID = ?",
+                [rank, userid]
+              );
+            }
+          }
+        );
       }
       response.sendStatus(200);
       response.end();
-  });
+    }
+  );
 });
 
-app.get('/payment-info', function (request, response) {
+app.get("/payment-info", function (request, response) {
   let booking = request.query.bookingid;
-  connection.query("SELECT ct.ctUserID, concat(ct.ctFirstName,' ',ct.ctLastName) as ctFullname, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkDeposit, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime, rm.rImage FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join customerinfo ct on ct.ctUserID = b.ctUserID left join (select DISTINCT RoomTypeID, rImage from roominfo) rm on rm.RoomTypeID = r.RoomTypeID where b.BookingID = '" + booking + "'", function (error, results) {
+  connection.query(
+    "SELECT ct.ctUserID, concat(ct.ctFirstName,' ',ct.ctLastName) as ctFullname, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkDeposit, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime, rm.rImage FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join customerinfo ct on ct.ctUserID = b.ctUserID left join (select DISTINCT RoomTypeID, rImage from roominfo) rm on rm.RoomTypeID = r.RoomTypeID where b.BookingID = '" +
+      booking +
+      "'",
+    function (error, results) {
       // If there is an issue with the query, output the error
       if (error) throw error;
       // If the account exists
       let dataResult = [];
       if (results.length > 0) {
-          for (let i = 0; i < results.length; i++) {
-              let body = {
-                  rowId: results[i].rowId,
-                  ctUserID: results[i].ctUserID,
-                  ctFullname: results[i].ctFullname,
-                  BookingID: results[i].BookingID,
-                  RoomTypeName: results[i].RoomTypeName,
-                  checkin: results[i].bkCheckInDate,
-                  checkout: results[i].bkLeaveDate,
-                  dcCode: results[i].dcCode,
-                  point: results[i].bkpointDiscount,
-                  price: results[i].bkTotalPrice,
-                  getPoint: results[i].bkGetPoint,
-                  reason: results[i].bkReason,
-                  status: results[i].bkStatus,
-                  cIntime: results[i].cIntime,
-                  cOuttime: results[i].cOuttime,
-                  image: results[i].rImage,
-                  deposit: results[i].bkDeposit
-              }
-              dataResult.push(body);
-          }
-          response.send(dataResult[0]);
-          response.end();
+        for (let i = 0; i < results.length; i++) {
+          let body = {
+            rowId: results[i].rowId,
+            ctUserID: results[i].ctUserID,
+            ctFullname: results[i].ctFullname,
+            BookingID: results[i].BookingID,
+            RoomTypeName: results[i].RoomTypeName,
+            checkin: results[i].bkCheckInDate,
+            checkout: results[i].bkLeaveDate,
+            dcCode: results[i].dcCode,
+            point: results[i].bkpointDiscount,
+            price: results[i].bkTotalPrice,
+            getPoint: results[i].bkGetPoint,
+            reason: results[i].bkReason,
+            status: results[i].bkStatus,
+            cIntime: results[i].cIntime,
+            cOuttime: results[i].cOuttime,
+            image: results[i].rImage,
+            deposit: results[i].bkDeposit,
+          };
+          dataResult.push(body);
+        }
+        response.send(dataResult[0]);
+        response.end();
       } else {
-          response.send({});
-          response.end();
+        response.send({});
+        response.end();
       }
-  });
+    }
+  );
 });
-
 
 app.get("/staff", function (request, response) {
   let dataResult = [];
@@ -872,7 +963,7 @@ app.get("/review-cancel-info", function (request, response) {
             roomPrice: results[i].bkTotalPrice,
             dcCode: results[i].dcCode,
             usePoint: results[i].bkpointDiscount,
-            roomid: results[0].RoomID
+            roomid: results[0].RoomID,
           };
           ResultData.push(body);
         }
@@ -951,7 +1042,7 @@ app.put("/update-reason-cancel", function (request, response) {
     // Execute SQL query that'll select the account from the database based on the specified username and password
     connection.query(
       "UPDATE bookinginfo SET bkReason=?, bkStatus=? WHERE BookingID = ?",
-      [reason, 'Cancel', bookingid],
+      [reason, "Cancel", bookingid],
       function (error) {
         // If there is an issue with the query, output the error
         if (error) {
@@ -991,30 +1082,51 @@ app.get("/reason", function (request, response) {
   );
 });
 
-app.delete('/cancel-room', function (request, response) {
+app.delete("/cancel-room", function (request, response) {
   let userid = request.body.userid;
   let bookingid = request.body.bookingid;
   let reason = request.body.reason;
-  connection.query("SELECT b.bkStatus FROM bookinginfo b WHERE b.ctUserID='" + userid + "' AND b.BookingID='" + bookingid + "'", function (error, results) {
+  connection.query(
+    "SELECT b.bkStatus FROM bookinginfo b WHERE b.ctUserID='" +
+      userid +
+      "' AND b.BookingID='" +
+      bookingid +
+      "'",
+    function (error, results) {
       // If there is an issue with the query, output the error
-      if (error) throw (error);
+      if (error) throw error;
       // If the account exists
       if (results.length > 0) {
-          if (results[0].bkStatus === 'NOT PAID') {
-              connection.query("UPDATE bookinginfo b  SET b.bkReason = '" + reason + "', b.bkStatus = 'CANCEL' WHERE b.ctUserID='" + userid + "' AND b.BookingID='" + bookingid + "' AND b.bkStatus = 'NOT PAID'");
-              connection.query("UPDATE customerinfo SET ctPoint=ctPoint+(select bkpointDiscount from bookinginfo where BookingID='" + bookingid + "') WHERE ctUserID='" + userid + "'");
-              response.status(200).json({ message: 'ok' });
-              response.end();
-          } else {
-              response.sendStatus(400);
-              response.end();
-          }
-      } else {
+        if (results[0].bkStatus === "NOT PAID") {
+          connection.query(
+            "UPDATE bookinginfo b  SET b.bkReason = '" +
+              reason +
+              "', b.bkStatus = 'CANCEL' WHERE b.ctUserID='" +
+              userid +
+              "' AND b.BookingID='" +
+              bookingid +
+              "' AND b.bkStatus = 'NOT PAID'"
+          );
+          connection.query(
+            "UPDATE customerinfo SET ctPoint=ctPoint+(select bkpointDiscount from bookinginfo where BookingID='" +
+              bookingid +
+              "') WHERE ctUserID='" +
+              userid +
+              "'"
+          );
+          response.status(200).json({ message: "ok" });
+          response.end();
+        } else {
           response.sendStatus(400);
           response.end();
+        }
+      } else {
+        response.sendStatus(400);
+        response.end();
       }
       response.end();
-  });
+    }
+  );
 });
 app.get("/check", function (request, response) {
   let search = request.query.search;
@@ -1241,7 +1353,7 @@ app.get("/allbooking", function (request, response) {
             reason: results[i].bkReason,
             bkstatus: results[i].bkStatus,
             review: results[i].rvComment,
-            rate: results[i].rvScore
+            rate: results[i].rvScore,
           };
           dataResult.push(body);
         }
