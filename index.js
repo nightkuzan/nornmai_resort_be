@@ -1202,6 +1202,34 @@ app.get("/review-cancel-info", function (request, response) {
   );
 });
 
+app.post("/discount-info", function (request, response) {
+  let dcCode = request.body.dcCode;
+  let dcRate = request.body.dcRate;
+  let dcStartDate = request.body.dcStartDate;
+  let dcEndDate = request.body.dcEndDate;
+  let dcAmount = request.body.dcAmount;
+  if (dcAmount == "-") {
+    dcAmount = null;
+  }
+  
+  connection.query(
+    "UPDATE seasondiscount SET dcRate = ?, dcStartDate = ?, dcEndDate = ?, dcAmount = ? WHERE dcCode = ?",
+    [dcRate, dcStartDate, dcEndDate, dcAmount, dcCode],
+    function (error) {
+      // If there is an issue with the query, output the error
+      if (error) {
+        throw error;
+      } else {
+        let body = {
+          status: "success",
+        };
+        response.send(body);
+        response.end();
+      }
+    }
+  );
+});
+
 app.get("/discount-info", function (request, response) {
   let dataResult = [];
   connection.query(
