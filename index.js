@@ -889,18 +889,14 @@ app.get("/reserve-room", function (request, response) {
 
   // loop for every day
   let query =
-    "select min(a.room_free) as roomFree, a.RoomTypeID, a.RoomTypeName, a.rDefaultPrice, a.rImage, a.rRating, a.rCapacity, a.rDescription, a.RoomID from (";
-  for (var day = from; day <= to; day.setDate(day.getDate() + 1)) {
-    let date = moment(day).format("YYYY-MM-DD");
-    query +=
-      "select r.RoomTotal - count(b.BookingID) as room_free,ri.RoomID, r.RoomTypeID, r.RoomTypeName, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription from roomtype r " +
-      "left join (select DISTINCT RoomID,RoomTypeID, rDefaultPrice, rImage, rRating, rCapacity, rDescription from roominfo) ri on ri.RoomTypeID = r.RoomTypeID " +
-      "left join bookinginfo b  on b.RoomTypeID = r.RoomTypeID and '" +
-      date +
-      "' BETWEEN b.bkCheckInDate and b.bkLeaveDate and b.bkLeaveDate != '" +
-      date +
-      "' and b.bkStatus != 'CANCEL' " +
-      "where b.bkReason is null " +
+  "select min(a.room_free) as roomFree, a.RoomTypeID, a.RoomTypeName, a.rDefaultPrice, a.rImage, a.rRating, a.rCapacity, a.rDescription,a.RoomID from (";
+for (var day = from; day <= to; day.setDate(day.getDate() + 1)) {
+  let date = moment(day).format("YYYY-MM-DD");
+  query +=
+    "select r.RoomTotal - count(b.RoomTypeID) as room_free,ri.RoomID, r.RoomTypeID, r.RoomTypeName, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription from roomtype r " +
+    "left join bookinginfo b  on b.RoomTypeID = r.RoomTypeID and '" +date+"' BETWEEN b.bkCheckInDate and b.bkLeaveDate and b.bkLeaveDate != '" +date+"' and b.bkStatus != 'CANCEL' " +
+    "JOIN (SELECT DISTINCT RoomID, RoomTypeID, rDefaultPrice, rImage, rRating, rCapacity, rDescription, rfloor FROM roominfo) ri ON ri.RoomTypeID = r.RoomTypeID WHERE b.bkReason IS NULL "
+    +
       "group by r.RoomTypeID, r.RoomTypeName, r.RoomTotal, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription ";
     if (day < to) {
       query += "UNION ";
@@ -1028,12 +1024,13 @@ app.post("/reserve", function (request, response) {
   let point = totalPrice / 10;
   let roomType = request.body.roomType;
   let roomID = request.body.roomID;
+  let transferimg = request.body.transferimg;
 
   // Ensure the input fields exists and are not empty
   if (userid && roomType) {
     // Execute SQL query that'll select the account from the database based on the specified username and password
     connection.query(
-      "INSERT INTO `bookinginfo`(`ctUserID`, `bkCheckInDate`, `bkLeaveDate`, `bkNumPeople`, `bkpointDiscount`, `bkTotalPrice`, `dcCode`, `bkDeposit`, `bkStatus`, `bkGetPoint`, `RoomTypeID`,`RoomID`) VALUES (?,?,?,?,?,?,?,?,'NOT PAID',?,?,?)",
+      "INSERT INTO `bookinginfo`(`ctUserID`, `bkCheckInDate`, `bkLeaveDate`, `bkNumPeople`, `bkpointDiscount`, `bkTotalPrice`, `dcCode`, `bkDeposit`, `bkStatus`, `bkGetPoint`, `RoomTypeID`,`RoomID`,`bkTransfer`) VALUES (?,?,?,?,?,?,?,?,'NOT PAID',?,?,?,?)",
       [
         userid,
         checkin,
@@ -1046,6 +1043,7 @@ app.post("/reserve", function (request, response) {
         point,
         roomType,
         roomID,
+        transferimg,
       ],
       function (error) {
         // If there is an issue with the query, output the error
