@@ -680,7 +680,7 @@ app.get("/payment-info", function (request, response) {
   );
 });
 
-app.get("/staff", function (request, response) {
+app.get("/staff", function (request, response) { //done in ood
   let dataResult = [];
   connection.query(
     "SELECT s.StaffID, s.sFirstName, s.sLastName, s.sPhoneNum, s.sMail, p.pName FROM staffinfo s left join position p on p.PositionID = s.PositionID",
@@ -743,7 +743,7 @@ app.get("/staff-info", function (request, response) {
     }
   );
 });
-app.put("/staff/edit", function (request, response) {
+app.put("/staff/edit", function (request, response) { //done in ood
   let staffid = request.body.staffid;
   let firstname = request.body.firstname;
   let lastname = request.body.lastname;
@@ -773,7 +773,7 @@ app.put("/staff/edit", function (request, response) {
   }
 });
 
-app.post("/staff/add", function (request, response) {
+app.post("/staff/add", function (request, response) { //done in ood
   let password = request.body.password;
   let firstname = request.body.firstname;
   let lastname = request.body.lastname;
