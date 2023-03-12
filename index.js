@@ -312,7 +312,7 @@ app.post("/review-room", function (request, response) {
     }
   );
 });
-app.get("/room-admin", function (request, response) {
+app.get("/room-admin", function (request, response) { //done in ood
   let dataResult = [];
   connection.query(
     "SELECT r.RoomID, N.RoomTypeName, r.rStatus, r.rfloor, r.rCleaningState, r.rNumBed, r.rCapacity, r.rSize, r.rDefaultPrice, r.rImage, r.rDescription, r.rRating,N.RoomTypeID  FROM roominfo r left join roomtype N on r.RoomTypeID = N.RoomTypeID",
@@ -348,7 +348,7 @@ app.get("/room-admin", function (request, response) {
   );
 });
 
-app.get("/room-admin/roomid", function (request, response) {
+app.get("/room-admin/roomid", function (request, response) { //done in ood
   // roomid from params in request
   let roomID = request.query.roomId;
   connection.query(
@@ -370,7 +370,7 @@ app.get("/room-admin/roomid", function (request, response) {
   );
 });
 
-app.put("/room-admin/edit", function (request, response) {
+app.put("/room-admin/edit", function (request, response) { //done in ood
   // let roomID = request.params.id;
   let roomID = request.body.RoomID;
   let roomName = request.body.RoomTypeName;
@@ -441,7 +441,7 @@ app.get("/customer", function (request, response) {
   );
 });
 
-app.post("/room-admin/create", function (request, response) {
+app.post("/room-admin/create", function (request, response) { //done in ood
   // let raw = JSON.stringify({
   //   RoomID: this.state.RoomID,
   //   RoomTypeName: this.state.RoomTypeName,
@@ -529,7 +529,7 @@ app.put("/room/clean", function (request, response) {
     throw "error";
   }
 });
-app.get("/payment", function (request, response) {
+app.get("/payment", function (request, response) { //done in ood
   let search = request.query.search;
   let condition = "WHERE b.bkStatus != 'CANCEL'";
   if (search != null && search != "") {
@@ -636,10 +636,10 @@ app.post("/payment", function (request, response) {
   );
 });
 
-app.get("/payment-info", function (request, response) {
+app.get("/payment-info", function (request, response) { //done in ood
   let booking = request.query.bookingid;
   connection.query(
-    "SELECT ct.ctUserID, concat(ct.ctFirstName,' ',ct.ctLastName) as ctFullname, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkDeposit, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime, rm.rImage FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join customerinfo ct on ct.ctUserID = b.ctUserID left join (select DISTINCT RoomTypeID, rImage from roominfo) rm on rm.RoomTypeID = r.RoomTypeID where b.BookingID = '" +
+    "SELECT ct.ctUserID, concat(ct.ctFirstName,' ',ct.ctLastName) as ctFullname,b.bkTransfer, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkDeposit, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime, rm.rImage FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join customerinfo ct on ct.ctUserID = b.ctUserID left join (select DISTINCT RoomTypeID, rImage from roominfo) rm on rm.RoomTypeID = r.RoomTypeID where b.BookingID = '" +
       booking +
       "'",
     function (error, results) {
@@ -667,6 +667,7 @@ app.get("/payment-info", function (request, response) {
             cOuttime: results[i].cOuttime,
             image: results[i].rImage,
             deposit: results[i].bkDeposit,
+            bkTransfer: results[i].bkTransfer,
           };
           dataResult.push(body);
         }
@@ -680,7 +681,7 @@ app.get("/payment-info", function (request, response) {
   );
 });
 
-app.get("/staff", function (request, response) {
+app.get("/staff", function (request, response) { //done in ood
   let dataResult = [];
   connection.query(
     "SELECT s.StaffID, s.sFirstName, s.sLastName, s.sPhoneNum, s.sMail, p.pName FROM staffinfo s left join position p on p.PositionID = s.PositionID",
@@ -743,7 +744,7 @@ app.get("/staff-info", function (request, response) {
     }
   );
 });
-app.put("/staff/edit", function (request, response) {
+app.put("/staff/edit", function (request, response) { //done in ood
   let staffid = request.body.staffid;
   let firstname = request.body.firstname;
   let lastname = request.body.lastname;
@@ -773,7 +774,7 @@ app.put("/staff/edit", function (request, response) {
   }
 });
 
-app.post("/staff/add", function (request, response) {
+app.post("/staff/add", function (request, response) { //done in ood
   let password = request.body.password;
   let firstname = request.body.firstname;
   let lastname = request.body.lastname;
@@ -1590,7 +1591,7 @@ app.put("/check-out", function (request, response) {
   );
 });
 
-app.get("/allbooking", function (request, response) {
+app.get("/allbooking", function (request, response) { //done in ood
   let dataResult = [];
   connection.query(
     "SELECT b.ctUserID, ct.ctFirstName, ct.ctLastName, b.BookingID, rt.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount,b.bkTotalPrice, b.bkGetPoint, cn.cIntime, cn.cOuttime, b.bkReason, b.bkStatus, rn.rvComment, rn.rvScore FROM bookinginfo b left join reviewinfo rn on b.BookingID=rn.BookingID left join checkinfo cn on cn.BookingID=b.BookingID left join roomtype rt on b.RoomTypeID=rt.RoomTypeID left join customerinfo ct on ct.ctUserID=b.ctUserID ORDER BY b.BookingID ASC",
