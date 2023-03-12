@@ -889,14 +889,17 @@ app.get("/reserve-room", function (request, response) {
 
   // loop for every day
   let query =
-  "select min(a.room_free) as roomFree, a.RoomTypeID, a.RoomTypeName, a.rDefaultPrice, a.rImage, a.rRating, a.rCapacity, a.rDescription,a.RoomID from (";
-for (var day = from; day <= to; day.setDate(day.getDate() + 1)) {
-  let date = moment(day).format("YYYY-MM-DD");
-  query +=
-    "select r.RoomTotal - count(b.RoomTypeID) as room_free,ri.RoomID, r.RoomTypeID, r.RoomTypeName, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription from roomtype r " +
-    "left join bookinginfo b  on b.RoomTypeID = r.RoomTypeID and '" +date+"' BETWEEN b.bkCheckInDate and b.bkLeaveDate and b.bkLeaveDate != '" +date+"' and b.bkStatus != 'CANCEL' " +
-    "JOIN (SELECT DISTINCT RoomID, RoomTypeID, rDefaultPrice, rImage, rRating, rCapacity, rDescription, rfloor FROM roominfo) ri ON ri.RoomTypeID = r.RoomTypeID WHERE b.bkReason IS NULL "
-    +
+    "select min(a.room_free) as roomFree, a.RoomTypeID, a.RoomTypeName, a.rDefaultPrice, a.rImage, a.rRating, a.rCapacity, a.rDescription,a.RoomID from (";
+  for (var day = from; day <= to; day.setDate(day.getDate() + 1)) {
+    let date = moment(day).format("YYYY-MM-DD");
+    query +=
+      "select r.RoomTotal - count(b.RoomTypeID) as room_free,ri.RoomID, r.RoomTypeID, r.RoomTypeName, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription from roomtype r " +
+      "left join bookinginfo b  on b.RoomTypeID = r.RoomTypeID and '" +
+      date +
+      "' BETWEEN b.bkCheckInDate and b.bkLeaveDate and b.bkLeaveDate != '" +
+      date +
+      "' and b.bkStatus != 'CANCEL' " +
+      "JOIN (SELECT DISTINCT RoomID, RoomTypeID, rDefaultPrice, rImage, rRating, rCapacity, rDescription, rfloor FROM roominfo) ri ON ri.RoomTypeID = r.RoomTypeID WHERE b.bkReason IS NULL " +
       "group by r.RoomTypeID, r.RoomTypeName, r.RoomTotal, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription ";
     if (day < to) {
       query += "UNION ";
@@ -1105,9 +1108,13 @@ app.get("/reserve", function (request, response) {
     let date = moment(day).format("YYYY-MM-DD");
     query +=
       "select r.RoomTotal - count(b.RoomTypeID) as room_free,ri.RoomID, r.RoomTypeID, r.RoomTypeName, ri.rDefaultPrice, ri.rImage, ri.rRating, ri.rCapacity, ri.rDescription from roomtype r " +
-      "left join bookinginfo b  on b.RoomTypeID = r.RoomTypeID and '" +date+"' BETWEEN b.bkCheckInDate and b.bkLeaveDate and b.bkLeaveDate != '" +date+"' and b.bkStatus != 'CANCEL' " +
-      "JOIN (SELECT DISTINCT RoomID, RoomTypeID, rDefaultPrice, rImage, rRating, rCapacity, rDescription, rfloor FROM roominfo) ri ON ri.RoomTypeID = r.RoomTypeID WHERE b.bkReason IS NULL "
-      
+      "left join bookinginfo b  on b.RoomTypeID = r.RoomTypeID and '" +
+      date +
+      "' BETWEEN b.bkCheckInDate and b.bkLeaveDate and b.bkLeaveDate != '" +
+      date +
+      "' and b.bkStatus != 'CANCEL' " +
+      "JOIN (SELECT DISTINCT RoomID, RoomTypeID, rDefaultPrice, rImage, rRating, rCapacity, rDescription, rfloor FROM roominfo) ri ON ri.RoomTypeID = r.RoomTypeID WHERE b.bkReason IS NULL ";
+
     if (rtype != "") {
       query += "and r.RoomTypeName = " + "'" + rtype + "'" + " ";
     }
@@ -1133,7 +1140,7 @@ app.get("/reserve", function (request, response) {
       query += "UNION ";
     }
   }
-  query += 
+  query +=
     ") a GROUP by a.RoomTypeName, a.rDefaultPrice, a.rImage, a.rRating, a.rCapacity, a.RoomTypeID, a.rDescription, a.RoomID order by a.rDefaultPrice";
 
   // Execute SQL query that'll select the account from the database based on the specified username and password
@@ -1209,7 +1216,7 @@ app.post("/discount-info", function (request, response) {
   if (dcAmount == "-") {
     dcAmount = null;
   }
-  
+
   connection.query(
     "UPDATE seasondiscount SET dcRate = ?, dcStartDate = ?, dcEndDate = ?, dcAmount = ? WHERE dcCode = ?",
     [dcRate, dcStartDate, dcEndDate, dcAmount, dcCode],
