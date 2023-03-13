@@ -146,7 +146,7 @@ app.post("/login-admin", function (request, response) {
   }
 });
 
-app.get("/history", function (request, response) {
+app.get("/history", function (request, response) { //done in ood
   let userid = request.query.userid;
   connection.query(
     "SELECT ROW_NUMBER() OVER () as rowId, b.BookingID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkGetPoint, b.bkReason, b.bkStatus, case when c.cIntime is not null and c.cOuttime is not null and rw.ReviewID is null then 'Y' else 'N' end reviewOpen FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join reviewinfo rw on rw.BookingID = b.BookingID WHERE b.ctUserID='" +
@@ -983,7 +983,7 @@ app.get("/user-point", function (request, response) {
   );
 });
 
-app.get("/discount", function (request, response) {
+app.get("/discount", function (request, response) { //done in ood
   let dcCode = request.query.dcCode;
   query = "SELECT dcRate FROM seasondiscount WHERE dcCode = '" +
   dcCode +
@@ -1017,7 +1017,7 @@ app.get("/discount", function (request, response) {
   );
 });
 
-app.put("/discount", function (request, response) {
+app.put("/discount", function (request, response) { //done in ood
   let dcCode = request.body.dcCode;
   connection.query(
     "UPDATE seasondiscount SET dcAmount = dcAmount - 1 WHERE dcCode = '" +
@@ -1234,7 +1234,7 @@ app.get("/review-cancel-info", function (request, response) {
   );
 });
 
-app.post("/discount-info", function (request, response) {
+app.post("/discount-info", function (request, response) { //
   let dcCode = request.body.dcCode;
   let dcRate = request.body.dcRate;
   let dcStartDate = request.body.dcStartDate;
@@ -1262,7 +1262,7 @@ app.post("/discount-info", function (request, response) {
   );
 });
 
-app.get("/discount-info", function (request, response) {
+app.get("/discount-info", function (request, response) { //
   let dataResult = [];
   connection.query(
     "SELECT s.dcCode, s.dcRate, s.dcStartDate, s.dcEndDate, s.dcAmount FROM seasondiscount s where s.dcCode !='NONE' order by s.dcEndDate desc",
@@ -1291,7 +1291,7 @@ app.get("/discount-info", function (request, response) {
   );
 });
 
-app.post("/discount/add", function (request, response) {
+app.post("/discount/add", function (request, response) { //
   let dcCode = request.body.dcCode;
   let dcRate = request.body.dcRate;
   let startDate = request.body.startDate;
@@ -1372,7 +1372,7 @@ app.get("/reason", function (request, response) {
   );
 });
 
-app.delete("/cancel-room", function (request, response) {
+app.delete("/cancel-room", function (request, response) { //done in ood
   let userid = request.body.userid;
   let bookingid = request.body.bookingid;
   let reason = request.body.reason;
@@ -1418,7 +1418,7 @@ app.delete("/cancel-room", function (request, response) {
     }
   );
 });
-app.get("/check", function (request, response) {
+app.get("/check", function (request, response) { //done in ood
   let search = request.query.search;
   let condition =
     "WHERE b.bkStatus NOT IN ('CANCEL', 'NOT PAID', 'DEPOSIT PAID') ";
@@ -1476,7 +1476,7 @@ app.get("/check", function (request, response) {
   );
 });
 
-app.get("/check-info", function (request, response) {
+app.get("/check-info", function (request, response) {//done in ood
   let booking = request.query.bookingid;
   connection.query(
     "SELECT ct.ctUserID, concat(ct.ctFirstName,' ',ct.ctLastName) as ctFullname, b.BookingID, r.RoomTypeID, r.RoomTypeName, b.bkCheckInDate, b.bkLeaveDate, b.dcCode, b.bkpointDiscount, b.bkTotalPrice, b.bkDeposit, b.bkGetPoint, b.bkReason, b.bkStatus, c.cIntime, c.cOuttime, rm.rImage FROM bookinginfo b left join checkinfo c on b.BookingID = c.BookingID left join roomtype r on r.RoomTypeID = b.RoomTypeID left join customerinfo ct on ct.ctUserID = b.ctUserID left join (select DISTINCT RoomTypeID, rImage from roominfo) rm on rm.RoomTypeID = r.RoomTypeID where b.BookingID = '" +
@@ -1533,7 +1533,7 @@ app.get("/check-info", function (request, response) {
   );
 });
 
-app.get("/check-info-out", function (request, response) {
+app.get("/check-info-out", function (request, response) { //done in ood
   let bookingid = request.query.bookingid;
   connection.query(
     "SELECT c.RoomID, c.cName, c.cIntime, c.cInpeople, r.rImage, b.bkCheckInDate, b.bkLeaveDate FROM checkinfo c left join roominfo r on r.RoomID = c.RoomID left join bookinginfo b on b.BookingID = c.BookingID where c.BookingID = ?",
@@ -1574,7 +1574,7 @@ app.get("/check-info-out", function (request, response) {
   );
 });
 
-app.post("/check-in", function (request, response) {
+app.post("/check-in", function (request, response) { //done in ood
   let booking = request.body.bookingid;
   let staffid = request.body.staffid;
   let cInpeople = request.body.cInpeople;
@@ -1597,7 +1597,7 @@ app.post("/check-in", function (request, response) {
   );
 });
 
-app.put("/check-out", function (request, response) {
+app.put("/check-out", function (request, response) { //done in ood
   let booking = request.body.bookingid;
   let room = request.body.room;
   connection.query(
@@ -1617,7 +1617,7 @@ app.put("/check-out", function (request, response) {
   );
 });
 
-app.get("/allbooking", function (request, response) {
+app.get("/allbooking", function (request, response) { //done in ood
   //done in ood
   let dataResult = [];
   connection.query(
