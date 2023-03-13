@@ -380,7 +380,7 @@ app.put("/room-admin/edit", function (request, response) {
   //done in ood
   // let roomID = request.params.id;
   let roomID = request.body.RoomID;
-  let roomName = request.body.RoomTypeName;
+  // let roomName = request.body.RoomTypeName;
   let rfloor = request.body.rfloor;
   let rNumbed = request.body.rNumBed;
   let rCapacity = request.body.rCapacity;
@@ -388,9 +388,9 @@ app.put("/room-admin/edit", function (request, response) {
   let rImage = request.body.rImage;
   let rDescription = request.body.rDescription;
   let rDefaultRoomID = request.body.rDefaultRoomID;
-  // console.log(roomID, roomName, rfloor, rNumbed, rCapacity, rDefaultPrice, rImage, rDescription,rDefaultRoomID);
+  let RoomTypeID = request.body.RoomTypeID;
   connection.query(
-    "UPDATE roominfo SET RoomID = ?, rfloor = ?, rNumBed = ?, rCapacity = ?, rDefaultPrice = ?, rImage = ?, rDescription = ? WHERE RoomID = ?",
+    "UPDATE roominfo SET RoomID = ?, rfloor = ?, rNumBed = ?, rCapacity = ?, rDefaultPrice = ?, rImage = ?, rDescription = ?, RoomTypeID = ? WHERE RoomID = ?",
     [
       roomID,
       rfloor,
@@ -399,6 +399,7 @@ app.put("/room-admin/edit", function (request, response) {
       rDefaultPrice,
       rImage,
       rDescription,
+      RoomTypeID,
       rDefaultRoomID,
     ],
     function (error, results) {
