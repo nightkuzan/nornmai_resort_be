@@ -1371,7 +1371,7 @@ app.get("/reason", function (request, response) {
   );
 });
 
-app.delete("/cancel-room", function (request, response) {
+app.delete("/cancel-room", function (request, response) { //done in ood
   let userid = request.body.userid;
   let bookingid = request.body.bookingid;
   let reason = request.body.reason;
