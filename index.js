@@ -366,7 +366,6 @@ app.get("/room-admin/roomid", function (request, response) {
       }
 
       if (results) {
-        console.log(results);
         response.send(results);
         response.end();
       } else {
