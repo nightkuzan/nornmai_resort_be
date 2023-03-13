@@ -389,6 +389,7 @@ app.put("/room-admin/edit", function (request, response) {
   let rDescription = request.body.rDescription;
   let rDefaultRoomID = request.body.rDefaultRoomID;
   let RoomTypeID = request.body.RoomTypeID;
+  let rPrice = request.body.rPrice;
   connection.query(
     "UPDATE roominfo SET RoomID = ?, rfloor = ?, rNumBed = ?, rCapacity = ?, rDefaultPrice = ?, rImage = ?, rDescription = ?, RoomTypeID = ? WHERE RoomID = ?",
     [
@@ -396,7 +397,7 @@ app.put("/room-admin/edit", function (request, response) {
       rfloor,
       rNumbed,
       rCapacity,
-      rDefaultPrice,
+      rPrice,
       rImage,
       rDescription,
       RoomTypeID,
