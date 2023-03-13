@@ -984,12 +984,20 @@ app.get("/user-point", function (request, response) {
 
 app.get("/discount", function (request, response) {
   let dcCode = request.query.dcCode;
+  query = "SELECT dcRate FROM seasondiscount WHERE dcCode = '" +
+  dcCode +
+  "' AND (dcAmount > 0 OR dcAmount IS NULL) AND (dcStartDate <= " +
+  "CURRENT_DATE" +
+  " OR dcStartDate IS NULL) AND (dcEndDate >= " +
+  "CURRENT_DATE" +
+  " OR dcEndDate IS NULL)"
+  // console.log(query);
   connection.query(
-    "SELECT s.dcRate FROM seasondiscount s WHERE s.dcStartDate <= CURRENT_DATE and s.dcAmount >0  and  s.dcEndDate >= CURRENT_DATE and s.dcCode ='" +
-      dcCode +
-      "'" +
-      "and (s.dcAmount>0 or s.dcAmount is null)",
+    // select dcRate from seasondiscount if dcCode = dcCode and( dcAmount > 0 or dcAmount = null )and (dcStartDate <= currentDate or dcStartDate = null) and (dcEndDate >= currentDate or dcEndDate = null)
+     query
+      ,
     function (error, results) {
+      console.log();
       // If there is an issue with the query, output the error
       if (error) throw error;
       // If the account exists
