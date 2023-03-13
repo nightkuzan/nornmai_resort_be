@@ -358,7 +358,7 @@ app.get("/room-admin/roomid", function (request, response) {
   // roomid from params in request
   let roomID = request.query.roomId;
   connection.query(
-    "SELECT r.RoomID, N.RoomTypeName, r.rStatus, r.rfloor, r.rCleaningState, r.rNumBed, r.rCapacity, r.rSize, r.rDefaultPrice, r.rImage, r.rDescription, r.rRating  FROM roominfo r left join roomtype N on r.RoomTypeID = N.RoomTypeID WHERE r.RoomID = ?",
+    "SELECT N.RoomTypeID, r.RoomID, N.RoomTypeName, r.rStatus, r.rfloor, r.rCleaningState, r.rNumBed, r.rCapacity, r.rSize, r.rDefaultPrice, r.rImage, r.rDescription, r.rRating  FROM roominfo r left join roomtype N on r.RoomTypeID = N.RoomTypeID WHERE r.RoomID = ?",
     [roomID],
     function (error, results) {
       if (error) {
@@ -366,6 +366,7 @@ app.get("/room-admin/roomid", function (request, response) {
       }
 
       if (results) {
+        console.log(results);
         response.send(results);
         response.end();
       } else {
