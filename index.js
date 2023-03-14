@@ -1244,6 +1244,30 @@ app.post("/discount-info", function (request, response) { //
   if (dcAmount == "-") {
     dcAmount = null;
   }
+  console.log(dcStartDate);
+
+  if (dcStartDate == 'Invalid date') {
+    dcStartDate = null;
+  }
+  if (dcEndDate == 'Invalid date') {
+    dcEndDate = null;
+  }
+
+  // cast amount to int
+  // dcAmount = parseInt(dcAmount);
+
+  // cast type stirng to date
+  dcStartDate = new Date(dcStartDate);
+  dcEndDate = new Date(dcEndDate);
+
+  // if(dcStartDate ==='1999-01-01') {
+  //   dcStartDate = null;
+  // }
+  // if(dcEndDate ==='2500-01-01') {
+  //   dcEndDate = null;
+  // }
+
+  console.log(dcStartDate);
 
   connection.query(
     "UPDATE seasondiscount SET dcRate = ?, dcStartDate = ?, dcEndDate = ?, dcAmount = ? WHERE dcCode = ?",
@@ -1252,7 +1276,8 @@ app.post("/discount-info", function (request, response) { //
       // If there is an issue with the query, output the error
       if (error) {
         throw error;
-      } else {
+      } 
+      else {
         let body = {
           status: "success",
         };
