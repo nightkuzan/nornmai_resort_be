@@ -1253,12 +1253,19 @@ app.post("/discount-info", function (request, response) { //
     dcEndDate = null;
   }
 
+  if (moment(dcStartDate).format('yyyy-mm-dd') == '1970-01-01') {
+    dcStartDate = null;
+    dcEndDate = null;
+
+  }
+
+
   // cast amount to int
   // dcAmount = parseInt(dcAmount);
 
   // cast type stirng to date
-  dcStartDate = new Date(dcStartDate);
-  dcEndDate = new Date(dcEndDate);
+  // dcStartDate = new Date(dcStartDate);
+  // dcEndDate = new Date(dcEndDate);
 
   // if(dcStartDate ==='1999-01-01') {
   //   dcStartDate = null;
